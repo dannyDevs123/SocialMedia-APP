@@ -1,11 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const cookieParser = require('cookie-parser');
-const { CLIENT_URL, RATE_LIMIT_WINDOW, RATE_LIMIT_MAX } = require('./config/env');
+const { CLIENT_URL } = require('./config/env');
+const { apiLimiter } = require('./middleware/rateLimiter');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -25,15 +25,7 @@ app.use(
 );
 
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: RATE_LIMIT_WINDOW * 60 * 1000,
-  max: RATE_LIMIT_MAX,
-  message: {
-    success: false,
-    message: 'Too many requests, please try again later',
-  },
-});
-app.use('/api/', limiter);
+app.use('/api/', apiLimiter);
 
 // Body parser
 app.use(express.json({ limit: '10mb' }));
