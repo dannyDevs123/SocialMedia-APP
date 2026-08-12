@@ -11,6 +11,11 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 app.set('trust proxy', 1);
 
+// Temporary debug route to verify Render's forwarded client IP handling.
+app.get('/api/debug/ip', (req, res) => {
+  res.json({ clientIp: req.ip, headers: req.headers['x-forwarded-for'] });
+});
+
 // Security middleware
 app.use(helmet());
 
