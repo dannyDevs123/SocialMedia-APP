@@ -9,6 +9,7 @@ const { CLIENT_URL, RATE_LIMIT_WINDOW, RATE_LIMIT_MAX } = require('./config/env'
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());
