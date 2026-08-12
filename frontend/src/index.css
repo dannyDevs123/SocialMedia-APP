@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-[#0f1419] antialiased min-h-screen;
+  }
+
+  ::selection {
+    @apply bg-[#1d9bf0]/20 text-[#1d9bf0];
+  }
+}
+
+@layer components {
+  /* ── Buttons ── */
+  .btn-primary {
+    @apply bg-[#1d9bf0] text-white px-5 py-2.5 rounded-full
+      hover:bg-[#1a8cd8] transition-all duration-200 font-bold text-sm
+      active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none
+      focus:outline-none;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-[#0f1419] px-5 py-2.5 rounded-full border border-[#cfd9de]
+      hover:bg-[#f7f9f9] transition-all duration-200 font-bold text-sm
+      active:scale-[0.97]
+      focus:outline-none;
+  }
+
+  .btn-ghost {
+    @apply text-[#536471] hover:text-[#0f1419] hover:bg-[#f7f9f9] px-3 py-1.5 rounded-full
+      transition-all duration-200 font-medium text-sm;
+  }
+
+  .btn-outline-white {
+    @apply text-[#1d9bf0] border border-[#cfd9de] px-4 py-1.5 rounded-full
+      hover:bg-[#1d9bf0]/5 transition-all duration-200 font-bold text-sm;
+  }
+
+  /* ── Cards ── */
+  .card {
+    @apply bg-white rounded-2xl border border-[#eff3f4] p-4
+      transition-all duration-200 hover:bg-[#f7f9f9]/50;
+  }
+
+  /* ── Input ── */
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-[#cfd9de] rounded-md
+      placeholder:text-[#536471] text-[#0f1419]
+      focus:outline-none focus:ring-2 focus:ring-[#1d9bf0]/30 focus:border-[#1d9bf0]
+      transition-all duration-200;
+  }
+
+  /* ── Avatar ring ── */
+  .avatar-ring {
+    @apply ring-1 ring-[#cfd9de]/50;
+  }
+
+  /* ── Action buttons ── */
+  .action-btn {
+    @apply flex items-center gap-1 px-2 py-1 rounded-full text-sm
+      transition-all duration-200 active:scale-95;
+  }
+
+  /* ── Tab buttons ── */
+  .tab-btn {
+    @apply px-4 py-3 text-sm font-medium transition-all duration-200
+      relative text-[#536471] hover:bg-[#e8e8e8]/50;
+  }
+
+  .tab-btn-active {
+    @apply text-[#0f1419] font-bold;
+  }
+
+  .tab-btn-active::after {
+    content: '';
+    @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1 bg-[#1d9bf0] rounded-full;
+  }
+
+  .tab-btn-inactive {
+    @apply text-[#536471] hover:text-[#0f1419];
+  }
+
+  /* ── Timestamp ── */
+  .timestamp {
+    @apply text-sm text-[#536471];
+  }
+
+  /* ── Auth layout ── */
+  .auth-layout {
+    @apply min-h-screen flex items-center justify-center px-4 py-10 bg-[#f7f9f9];
+  }
+
+  /* ── Sidebar nav item ── */
+  .nav-item {
+    @apply flex items-center gap-4 px-4 py-3 rounded-full text-xl
+      hover:bg-[#e8e8e8]/60 transition-all duration-200 font-normal
+      text-[#0f1419];
+  }
+
+  .nav-item.active {
+    @apply font-bold;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    @apply border-t border-[#eff3f4];
+  }
+
+  /* ── Search input ── */
+  .search-input {
+    @apply w-full bg-[#eff3f4] border-none rounded-full py-3 px-5
+      placeholder:text-[#536471] text-[#0f1419] text-sm
+      focus:outline-none focus:ring-2 focus:ring-[#1d9bf0]/30 focus:bg-white
+      transition-all duration-200;
+  }
+
+  /* ── Who to follow card ── */
+  .follow-card {
+    @apply bg-[#f7f9f9] rounded-2xl p-4;
+  }
+
+  /* ── Post hover ── */
+  .post-hover {
+    @apply hover:bg-[#f7f9f9]/60 transition-colors duration-200;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
