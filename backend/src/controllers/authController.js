@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const { generateAccessToken, generateRefreshToken } = require('../utils/jwt');
 const { BCRYPT_ROUNDS } = require('../config/env');
-const { buildAvatarUrl, deleteLocalAvatarIfExists } = require('../utils/avatar');
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -235,7 +234,7 @@ exports.getMe = async (req, res, next) => {
 // @desc    Update user profile
 // @route   PUT /api/auth/profile
 // @access  Private
-exports.updateProfile = async (req, res, next) => {
+exports.updateProfile = async (req, res) => {
   try {
     const { name, bio } = req.body;
     const updates = {};
@@ -244,11 +243,7 @@ exports.updateProfile = async (req, res, next) => {
     if (bio !== undefined) updates.bio = bio;
 
     if (req.file) {
-      const currentUser = await User.findById(req.user._id);
-      if (currentUser?.avatar) {
-        deleteLocalAvatarIfExists(currentUser.avatar);
-      }
-      updates.avatar = buildAvatarUrl(req, req.file.filename);
+      updates.avatar = req.file.path;
     }
 
     const user = await User.findByIdAndUpdate(
@@ -272,9 +267,13 @@ exports.updateProfile = async (req, res, next) => {
       },
     });
   } catch (error) {
+    console.error('Profile update failed:', error.message);
     if (req.file) {
-      deleteLocalAvatarIfExists(buildAvatarUrl(req, req.file.filename));
+      return res.status(500).json({ message: 'Image upload failed' });
     }
-    next(error);
+    res.status(500).json({
+      success: false,
+      message: 'Profile update failed',
+    });
   }
 };

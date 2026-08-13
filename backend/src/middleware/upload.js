@@ -1,22 +1,19 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-const uploadDir = path.join(__dirname, '../../uploads/avatars');
-
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('../config/cloudinary');
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${req.user._id}-${Date.now()}${ext}`);
-  },
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => ({
+    folder: 'zizu_avatars',
+    public_id: `${req.user._id}-${Date.now()}`,
+    transformation: [{ width: 500, height: 500, crop: 'fill' }],
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    resource_type: 'image',
+  }),
 });
 
 const fileFilter = (_req, file, cb) => {
@@ -27,14 +24,14 @@ const fileFilter = (_req, file, cb) => {
   cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.'), false);
 };
 
-const uploadAvatar = multer({
+const upload = multer({
   storage,
   fileFilter,
   limits: { fileSize: MAX_FILE_SIZE },
 });
 
 const handleAvatarUpload = (req, res, next) => {
-  uploadAvatar.single('avatar')(req, res, (err) => {
+  upload.single('avatar')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
@@ -45,10 +42,11 @@ const handleAvatarUpload = (req, res, next) => {
       return res.status(400).json({ success: false, message: err.message });
     }
     if (err) {
-      return res.status(400).json({ success: false, message: err.message });
+      console.error('Avatar upload failed:', err.message);
+      return res.status(500).json({ message: 'Image upload failed' });
     }
     next();
   });
 };
 
-module.exports = { handleAvatarUpload, uploadDir };
+module.exports = { upload, handleAvatarUpload };
