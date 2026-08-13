@@ -56,7 +56,7 @@ const Login = () => {
                 {...register('email')}
                 type="email"
                 className="w-full border border-gray-300 rounded-md p-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200"
-                placeholder="you@example.com"
+                placeholder="name@gmail.com"
                 autoComplete="email"
               />
               {errors.email && <p className="text-[#f4212e] text-xs mt-1.5">{errors.email.message}</p>}
