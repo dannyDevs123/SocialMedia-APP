@@ -59,7 +59,7 @@ const Register = () => {
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input {...register('email')} type="email" className="w-full border border-gray-300 rounded-md p-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200" placeholder="you@example.com" autoComplete="email" />
+              <input {...register('email')} type="email" className="w-full border border-gray-300 rounded-md p-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200" placeholder="name@gmail.com" autoComplete="email" />
               {errors.email && <p className="text-[#f4212e] text-xs mt-1.5">{errors.email.message}</p>}
             </div>
             <div className="mb-4">
