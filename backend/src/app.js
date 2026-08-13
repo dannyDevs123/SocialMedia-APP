@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -44,6 +45,9 @@ app.use(mongoSanitize());
 
 // Data sanitization against XSS
 app.use(xss());
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));

@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const { generateAccessToken, generateRefreshToken } = require('../utils/jwt');
 const { BCRYPT_ROUNDS } = require('../config/env');
+const { buildAvatarUrl, deleteLocalAvatarIfExists } = require('../utils/avatar');
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -236,11 +237,23 @@ exports.getMe = async (req, res, next) => {
 // @access  Private
 exports.updateProfile = async (req, res, next) => {
   try {
-    const { name, bio, avatar } = req.body;
+    const { name, bio } = req.body;
+    const updates = {};
+
+    if (name !== undefined) updates.name = name;
+    if (bio !== undefined) updates.bio = bio;
+
+    if (req.file) {
+      const currentUser = await User.findById(req.user._id);
+      if (currentUser?.avatar) {
+        deleteLocalAvatarIfExists(currentUser.avatar);
+      }
+      updates.avatar = buildAvatarUrl(req, req.file.filename);
+    }
 
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { name, bio, avatar },
+      updates,
       { new: true, runValidators: true }
     );
 
@@ -259,6 +272,9 @@ exports.updateProfile = async (req, res, next) => {
       },
     });
   } catch (error) {
+    if (req.file) {
+      deleteLocalAvatarIfExists(buildAvatarUrl(req, req.file.filename));
+    }
     next(error);
   }
 };

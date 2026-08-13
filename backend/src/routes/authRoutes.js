@@ -15,12 +15,13 @@ const {
   loginValidation,
   updateProfileValidation,
 } = require('../middleware/validation');
+const { handleAvatarUpload } = require('../middleware/upload');
 
 router.post('/register', authLimiter, registerValidation, register);
 router.post('/login', authLimiter, loginValidation, login);
 router.post('/refresh-token', refreshToken);
 router.post('/logout', auth, logout);
 router.get('/me', auth, getMe);
-router.put('/profile', auth, updateProfileValidation, updateProfile);
+router.put('/profile', auth, handleAvatarUpload, updateProfileValidation, updateProfile);
 
 module.exports = router;
