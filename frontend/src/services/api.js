@@ -1,7 +1,22 @@
 import axios from 'axios';
 
+const resolveApiBaseUrl = () => {
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+
+  // In CRA dev, setupProxy.js forwards /api to the backend and avoids CORS.
+  if (process.env.NODE_ENV === 'development') {
+    return '/api';
+  }
+
+  return 'http://localhost:5000/api';
+};
+
+export const API_BASE_URL = resolveApiBaseUrl();
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
   // Include httpOnly cookies (refresh token) on cross-origin requests.
   withCredentials: true,
@@ -37,7 +52,7 @@ api.interceptors.response.use(
       console.log('[api interceptor] Attempting token refresh...');
       try {
         const res = await axios.post(
-          `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/refresh-token`,
+          `${API_BASE_URL}/auth/refresh-token`,
           {},
           { withCredentials: true }
         );

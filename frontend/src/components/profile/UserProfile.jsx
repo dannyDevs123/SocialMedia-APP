@@ -6,6 +6,7 @@ import postService from '../../services/postService';
 import FollowButton from './FollowButton';
 import PostCard from '../posts/PostCard';
 import LoadingSpinner from '../common/LoadingSpinner';
+import Avatar from '../common/Avatar';
 import { toast } from 'react-toastify';
 import { asArray, sameId } from '../../utils/id';
 
@@ -66,13 +67,7 @@ const UserProfile = () => {
       to={`/profile/${u._id}`}
       className="card flex items-center gap-3 hover:bg-[#f7f9f9] transition-all duration-200"
     >
-      {u.avatar ? (
-        <img src={u.avatar} alt={u.name} className="w-11 h-11 rounded-full object-cover avatar-ring" />
-      ) : (
-        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#1d9bf0] to-[#1a8cd8] text-white flex items-center justify-center font-bold avatar-ring">
-          {u.name?.charAt(0)}
-        </div>
-      )}
+      <Avatar src={u.avatar} name={u.name} size="md" />
       <div>
         <p className="font-bold text-[#0f1419]">{u.name}</p>
         <p className="text-sm text-[#536471] mt-0.5">@{u.name?.toLowerCase().replace(/\s+/g, '')}</p>
@@ -107,13 +102,7 @@ const UserProfile = () => {
         <div className="px-4 pb-4">
           <div className="flex justify-between items-end -mt-16 mb-4">
             <div className="rounded-full ring-4 ring-white">
-              {profile.avatar ? (
-                <img src={profile.avatar} alt={profile.name} className="w-[133px] h-[133px] rounded-full object-cover" />
-              ) : (
-                <div className="w-[133px] h-[133px] rounded-full bg-gradient-to-br from-[#1d9bf0] to-[#1a8cd8] text-white flex items-center justify-center text-5xl font-bold">
-                  {profile.name?.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <Avatar src={profile.avatar} name={profile.name} size="xl" ring={false} />
             </div>
             <div className="flex gap-2">
               {isOwnProfile ? (

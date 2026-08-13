@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'react-toastify';
 import BrandWordmark from './BrandWordmark';
+import Avatar from './Avatar';
 
 const Navbar = () => {
   const { user, logout, loading } = useAuth();
@@ -113,17 +114,7 @@ const Navbar = () => {
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
               >
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-10 h-10 rounded-full object-cover avatar-ring"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1d9bf0] to-[#1a8cd8] text-white flex items-center justify-center font-bold text-sm">
-                    {user.name?.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                <Avatar src={user.avatar} name={user.name} size="sm" />
                 <div className="flex-1 text-left overflow-hidden">
                   <p className="text-sm font-bold text-[#0f1419] truncate">{user.name}</p>
                   <p className="text-sm text-[#536471] truncate">@{user.name?.toLowerCase().replace(/\s+/g, '')}</p>
@@ -232,13 +223,7 @@ const Navbar = () => {
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
               >
-                {user.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover avatar-ring" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1d9bf0] to-[#1a8cd8] text-white flex items-center justify-center text-xs font-bold">
-                    {user.name?.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                <Avatar src={user.avatar} name={user.name} size="xs" />
               </button>
               {menuOpen && (
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.15)] border border-[#eff3f4] py-3 animate-scale-in z-50">

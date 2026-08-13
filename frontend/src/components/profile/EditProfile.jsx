@@ -7,6 +7,7 @@ import { useAuth } from '../../hooks/useAuth';
 import authService from '../../services/authService';
 import { toast } from 'react-toastify';
 import LoadingSpinner from '../common/LoadingSpinner';
+import Avatar from '../common/Avatar';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -144,10 +145,11 @@ const EditProfile = () => {
             <div className="flex items-center gap-5">
               <div className="relative shrink-0">
                 {previewUrl ? (
-                  <img
+                  <Avatar
                     src={previewUrl}
-                    alt="Avatar preview"
-                    className="w-24 h-24 rounded-full object-cover avatar-ring"
+                    name={user?.name}
+                    size="lg"
+                    className={loading ? 'opacity-70' : ''}
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#1d9bf0] to-[#1a8cd8] text-white flex items-center justify-center text-3xl font-bold avatar-ring">

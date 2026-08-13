@@ -12,6 +12,13 @@ const authService = {
     }
     return api.put('/auth/profile', data);
   },
+  uploadAvatar: (file, profileData = {}, onUploadProgress) => {
+    const formData = new FormData();
+    if (profileData.name !== undefined) formData.append('name', profileData.name);
+    if (profileData.bio !== undefined) formData.append('bio', profileData.bio || '');
+    formData.append('avatar', file);
+    return api.put('/auth/profile', formData, { onUploadProgress });
+  },
 };
 
 export default authService;

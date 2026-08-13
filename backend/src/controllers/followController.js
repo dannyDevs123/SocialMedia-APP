@@ -134,6 +134,34 @@ exports.getFollowing = async (req, res, next) => {
   }
 };
 
+// @desc    Get follow suggestions for the current user
+// @route   GET /api/users/suggestions
+// @access  Private
+exports.getSuggestions = async (req, res, next) => {
+  try {
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 5, 1), 20);
+    const skip = (page - 1) * limit;
+
+    const following = await Follow.find({ followerId: req.user._id }).select('followingId');
+    const excludedIds = following.map((entry) => entry.followingId);
+    excludedIds.push(req.user._id);
+
+    const users = await User.find({ _id: { $nin: excludedIds } })
+      .select('name email avatar bio')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      success: true,
+      data: { users },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Check if current user follows a user
 // @route   GET /api/users/:userId/follow-status
 // @access  Private

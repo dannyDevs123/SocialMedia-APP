@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const cookieParser = require('cookie-parser');
-const { CLIENT_URL } = require('./config/env');
+const { corsOptions } = require('./config/cors');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -17,18 +17,17 @@ app.get('/api/debug/ip', (req, res) => {
   res.json({ clientIp: req.ip, headers: req.headers['x-forwarded-for'] });
 });
 
-// Security middleware
-app.use(helmet());
-
-// CORS
+// Helmet defaults block cross-origin <img> loads via Cross-Origin-Resource-Policy.
 app.use(
-  cors({
-    origin: CLIENT_URL,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginEmbedderPolicy: false,
   })
 );
+
+// CORS must allow the Vercel frontend origin and local dev origins.
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Rate limiting
 app.use('/api/', apiLimiter);
@@ -46,8 +45,17 @@ app.use(mongoSanitize());
 // Data sanitization against XSS
 app.use(xss());
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve uploaded avatars with headers that allow cross-origin embedding from the frontend.
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, '../uploads'), {
+    setHeaders(res) {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    },
+  })
+);
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));

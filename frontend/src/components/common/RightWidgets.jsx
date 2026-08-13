@@ -4,6 +4,7 @@ import followService from '../../services/followService';
 import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'react-toastify';
 import { asArray, getId } from '../../utils/id';
+import Avatar from './Avatar';
 
 const RightWidgets = () => {
   const { user } = useAuth();
@@ -70,17 +71,7 @@ const RightWidgets = () => {
                 return (
                   <div key={suggestedUserId || suggestedUser?.email} className="flex items-center gap-3">
                     <Link to={`/profile/${suggestedUserId}`}>
-                      {suggestedUser.avatar ? (
-                        <img
-                          src={suggestedUser.avatar}
-                          alt={suggestedUser.name}
-                          className="w-10 h-10 rounded-full object-cover avatar-ring hover:opacity-90 transition-opacity"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1d9bf0] to-[#1a8cd8] text-white flex items-center justify-center font-bold text-sm hover:opacity-90 transition-opacity">
-                          {suggestedUser.name?.charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                      <Avatar src={suggestedUser.avatar} name={suggestedUser.name} size="sm" className="hover:opacity-90 transition-opacity" />
                     </Link>
                     <div className="flex-1 min-w-0">
                       <Link

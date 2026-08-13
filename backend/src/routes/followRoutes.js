@@ -5,10 +5,12 @@ const {
   getFollowers,
   getFollowing,
   getFollowStatus,
+  getSuggestions,
 } = require('../controllers/followController');
 const auth = require('../middleware/auth');
 const { objectIdParam } = require('../middleware/validation');
 
+router.get('/suggestions', auth, getSuggestions);
 router.post('/:userId/follow', auth, objectIdParam('userId'), toggleFollow);
 router.get('/:userId/followers', objectIdParam('userId'), getFollowers);
 router.get('/:userId/following', objectIdParam('userId'), getFollowing);
