@@ -141,6 +141,7 @@ exports.login = async (req, res, next) => {
 // @desc    Refresh token
 // @route   POST /api/auth/refresh-token
 // @access  Public
+
 exports.refreshToken = async (req, res, next) => {
   try {
     const refreshToken = req.cookies?.refreshToken || req.body.refreshToken;
@@ -148,7 +149,7 @@ exports.refreshToken = async (req, res, next) => {
     if (!refreshToken) {
       return res.status(401).json({
         success: false,
-        message: 'Refresh token not found',
+        message: 'Try again later, refresh token not found',
       });
     }
 
