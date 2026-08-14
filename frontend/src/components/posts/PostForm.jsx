@@ -11,10 +11,17 @@ const schema = yup.object({
   content: yup.string().required('Content is required').max(500, 'Max 500 characters'),
 });
 
+const IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const VIDEO_MIME_TYPES = new Set(['video/mp4', 'video/webm', 'video/quicktime']);
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
+
 const PostForm = ({ onPostCreated }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [mediaPreview, setMediaPreview] = useState(null);
+  const [mediaType, setMediaType] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
   const {
     register,
@@ -28,22 +35,37 @@ const PostForm = ({ onPostCreated }) => {
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be under 5MB');
+
+    const isImage = IMAGE_MIME_TYPES.has(file.type);
+    const isVideo = VIDEO_MIME_TYPES.has(file.type);
+
+    if (!isImage && !isVideo) {
+      toast.error('Please select an image or video file');
       return;
     }
 
+    if (isImage && file.size > MAX_IMAGE_SIZE) {
+      toast.error('Images must be under 5MB');
+      return;
+    }
+
+    if (isVideo && file.size > MAX_VIDEO_SIZE) {
+      toast.error('Videos must be under 50MB');
+      return;
+    }
+
+    setSelectedFile(file);
+    setMediaType(isVideo ? 'video' : 'image');
+
     const reader = new FileReader();
-    reader.onload = (ev) => setImagePreview(ev.target.result);
+    reader.onload = (ev) => setMediaPreview(ev.target.result);
     reader.readAsDataURL(file);
   };
 
-  const removeImage = () => {
-    setImagePreview(null);
+  const removeMedia = () => {
+    setMediaPreview(null);
+    setMediaType('');
+    setSelectedFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -52,18 +74,16 @@ const PostForm = ({ onPostCreated }) => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const payload = {
-        content: data.content.trim(),
-        imageUrl: imagePreview || '',
-      };
+      const payload = new FormData();
+      payload.append('content', data.content.trim());
+      if (selectedFile) {
+        payload.append('media', selectedFile);
+      }
 
       const res = await postService.createPost(payload);
       onPostCreated(res.data.data.post);
       reset();
-      setImagePreview(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      removeMedia();
       toast.success('Posted!');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to create post');
@@ -98,12 +118,20 @@ const PostForm = ({ onPostCreated }) => {
             placeholder="What is happening?!"
           />
 
-          {imagePreview && (
+          {mediaPreview && (
             <div className="relative mt-3 rounded-2xl overflow-hidden border border-[#eff3f4]">
-              <img src={imagePreview} alt="Preview" className="w-full max-h-80 object-cover" />
+              {mediaType === 'video' ? (
+                <video
+                  src={mediaPreview}
+                  controls
+                  className="w-full max-h-80 bg-black object-contain"
+                />
+              ) : (
+                <img src={mediaPreview} alt="Preview" className="w-full max-h-80 object-cover" />
+              )}
               <button
                 type="button"
-                onClick={removeImage}
+                onClick={removeMedia}
                 className="absolute top-2 right-2 w-8 h-8 bg-black/60 hover:bg-black/80 text-white rounded-full flex items-center justify-center text-sm transition-colors"
               >
                 x
@@ -121,7 +149,13 @@ const PostForm = ({ onPostCreated }) => {
                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,.mov"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
               </label>
             </div>
 

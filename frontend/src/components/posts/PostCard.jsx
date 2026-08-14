@@ -20,6 +20,9 @@ const PostCard = ({ post, onDelete, onUpdate }) => {
 
   const isOwner = sameId(user?._id || user?.id, currentPost.userId?._id || currentPost.userId?.id || currentPost.userId);
   const canEdit = isOwner && new Date(currentPost.createdAt) > new Date(Date.now() - 5 * 60 * 1000);
+  const mediaSrc = currentPost.mediaUrl || currentPost.imageUrl || '';
+  const isVideoMedia =
+    currentPost.mediaType === 'video' || /\.(mp4|webm|mov)(\?.*)?$/i.test(mediaSrc);
 
   const handleDelete = async () => {
     if (!currentPost?._id) {
@@ -167,14 +170,21 @@ const PostCard = ({ post, onDelete, onUpdate }) => {
           ) : (
             <div className="mt-1">
               <p className="text-[15px] text-[#0f1419] whitespace-pre-wrap leading-relaxed">{displayText(currentPost.content)}</p>
-              {currentPost.imageUrl && (
+              {mediaSrc && isVideoMedia ? (
+                <video
+                  src={mediaSrc}
+                  controls
+                  className="mt-3 rounded-2xl w-full object-contain border border-[#eff3f4] bg-black"
+                  style={{ maxHeight: '512px' }}
+                />
+              ) : mediaSrc ? (
                 <img
-                  src={currentPost.imageUrl}
+                  src={mediaSrc}
                   alt="Post media"
                   className="mt-3 rounded-2xl w-full object-cover border border-[#eff3f4]"
                   style={{ maxHeight: '512px' }}
                 />
-              )}
+              ) : null}
             </div>
           )}
 
