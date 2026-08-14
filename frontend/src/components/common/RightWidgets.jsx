@@ -121,7 +121,7 @@ const RightWidgets = () => {
 
       <div className="px-1">
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-[#536471]">
-          <span>Â© {new Date().getFullYear()} ZiZU</span>
+          <span>{'\u00A9'} {new Date().getFullYear()} ZiZU</span>
         </div>
       </div>
     </aside>

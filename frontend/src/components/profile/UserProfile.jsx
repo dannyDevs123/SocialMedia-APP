@@ -9,6 +9,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import Avatar from '../common/Avatar';
 import { toast } from 'react-toastify';
 import { asArray, sameId } from '../../utils/id';
+import { displayText } from '../../utils/text';
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -119,7 +120,7 @@ const UserProfile = () => {
           <div>
             <h2 className="text-xl font-bold text-[#0f1419]">{profile.name}</h2>
             <p className="text-sm text-[#536471]">@{profile.name?.toLowerCase().replace(/\s+/g, '')}</p>
-            <p className="text-[15px] text-[#0f1419] mt-3 leading-relaxed">{profile.bio || ''}</p>
+            <p className="text-[15px] text-[#0f1419] mt-3 leading-relaxed">{displayText(profile.bio || '')}</p>
 
             {/* Stats */}
             <div className="flex gap-5 mt-3">

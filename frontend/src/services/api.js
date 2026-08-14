@@ -17,7 +17,12 @@ export const API_BASE_URL = resolveApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json; charset=utf-8',
+    Accept: 'application/json; charset=utf-8',
+  },
+  responseType: 'json',
+  responseEncoding: 'utf8',
   // Include httpOnly cookies (refresh token) on cross-origin requests.
   withCredentials: true,
 });

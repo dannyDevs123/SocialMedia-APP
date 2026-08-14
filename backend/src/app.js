@@ -7,10 +7,15 @@ const xss = require('xss-clean');
 const cookieParser = require('cookie-parser');
 const { corsOptions } = require('./config/cors');
 const { apiLimiter } = require('./middleware/rateLimiter');
+const ensureUtf8JsonResponse = require('./middleware/utf8Response');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 app.set('trust proxy', 1);
+
+app.get('/api/ping', (req, res) => {
+  res.status(200).send('OK');
+});
 
 // Temporary debug route to verify Render's forwarded client IP handling.
 app.get('/api/debug/ip', (req, res) => {
@@ -32,9 +37,12 @@ app.options('*', cors(corsOptions));
 // Rate limiting
 app.use('/api/', apiLimiter);
 
-// Body parser
-app.use(express.json({ limit: '10mb' }));
+// Body parser (Node parses request bodies as UTF-8 by default)
+app.use(express.json({ limit: '10mb', type: 'application/json' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Declare UTF-8 on all JSON responses
+app.use('/api', ensureUtf8JsonResponse);
 
 // Cookie parser
 app.use(cookieParser());

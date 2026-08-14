@@ -2,6 +2,10 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const { generateAccessToken, generateRefreshToken } = require('../utils/jwt');
 const { BCRYPT_ROUNDS } = require('../config/env');
+const {
+  uploadBufferToCloudinary,
+  MAX_IMAGE_SIZE,
+} = require('../middleware/upload');
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -243,7 +247,23 @@ exports.updateProfile = async (req, res) => {
     if (bio !== undefined) updates.bio = bio;
 
     if (req.file) {
-      updates.avatar = req.file.path;
+      if (req.file.size > MAX_IMAGE_SIZE) {
+        return res.status(400).json({
+          success: false,
+          message: 'Avatar images must be 5MB or smaller',
+        });
+      }
+
+      const uploadedAvatar = await uploadBufferToCloudinary(req.file, {
+        folder: 'social-app/avatars',
+        publicId: `avatar-${req.user._id}-${Date.now()}`,
+        resourceType: 'auto',
+        transformation: [
+          { width: 500, height: 500, crop: 'fill', gravity: 'face' },
+        ],
+      });
+
+      updates.avatar = uploadedAvatar.secure_url;
     }
 
     const user = await User.findByIdAndUpdate(

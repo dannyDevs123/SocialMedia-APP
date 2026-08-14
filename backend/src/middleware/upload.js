@@ -1,52 +1,135 @@
 const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const { Readable } = require('stream');
 const cloudinary = require('../config/cloudinary');
 
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const VIDEO_MIME_TYPES = new Set(['video/mp4', 'video/webm', 'video/quicktime']);
+const POST_MIME_TYPES = new Set([...IMAGE_MIME_TYPES, ...VIDEO_MIME_TYPES]);
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => ({
-    folder: 'zizu_avatars',
-    public_id: `${req.user._id}-${Date.now()}`,
-    transformation: [{ width: 500, height: 500, crop: 'fill' }],
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    resource_type: 'image',
-  }),
-});
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024;
 
-const fileFilter = (_req, file, cb) => {
-  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-    cb(null, true);
-    return;
+const memoryStorage = multer.memoryStorage();
+
+const getUploadErrorMessage = (fieldName, err) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return fieldName === 'avatar'
+        ? 'Avatar images must be 5MB or smaller'
+        : 'Post media must be 50MB or smaller';
+    }
+
+    if (err.code === 'LIMIT_FILE_COUNT') {
+      return 'Only one file can be uploaded at a time';
+    }
+
+    return err.message;
   }
-  cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.'), false);
+
+  return err?.message || 'File upload failed';
 };
 
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: MAX_FILE_SIZE },
-});
+const createUploadMiddleware = ({ fieldName, allowedMimeTypes, maxFileSize }) => {
+  const uploader = multer({
+    storage: memoryStorage,
+    limits: {
+      fileSize: maxFileSize,
+      files: 1,
+    },
+    fileFilter: (_req, file, cb) => {
+      if (allowedMimeTypes.has(file.mimetype)) {
+        return cb(null, true);
+      }
 
-const handleAvatarUpload = (req, res, next) => {
-  upload.single('avatar')(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
-      if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({
+      if (fieldName === 'avatar') {
+        return cb(new Error('Invalid file type. Only JPEG, PNG, and WebP images are allowed.'), false);
+      }
+
+      return cb(
+        new Error('Invalid file type. Only JPEG, PNG, WebP, MP4, WEBM, and MOV files are allowed.'),
+        false
+      );
+    },
+  }).single(fieldName);
+
+  return (req, res, next) => {
+    uploader(req, res, (err) => {
+      if (err) {
+        const message = getUploadErrorMessage(fieldName, err);
+        const statusCode = err instanceof multer.MulterError || err.message ? 400 : 500;
+
+        if (fieldName === 'avatar') {
+          return res.status(statusCode).json({
+            success: false,
+            message,
+          });
+        }
+
+        return res.status(statusCode).json({
           success: false,
-          message: 'Image must be 5MB or smaller',
+          message,
         });
       }
-      return res.status(400).json({ success: false, message: err.message });
-    }
-    if (err) {
-      console.error('Avatar upload failed:', err.message);
-      return res.status(500).json({ message: 'Image upload failed' });
-    }
-    next();
+
+      next();
+    });
+  };
+};
+
+const handleAvatarUpload = createUploadMiddleware({
+  fieldName: 'avatar',
+  allowedMimeTypes: IMAGE_MIME_TYPES,
+  maxFileSize: MAX_IMAGE_SIZE,
+});
+
+const handlePostMediaUpload = createUploadMiddleware({
+  fieldName: 'media',
+  allowedMimeTypes: POST_MIME_TYPES,
+  maxFileSize: MAX_VIDEO_SIZE,
+});
+
+const uploadBufferToCloudinary = (file, options = {}) => {
+  if (!file?.buffer) {
+    return Promise.resolve(null);
+  }
+
+  const {
+    folder,
+    publicId,
+    resourceType = 'auto',
+    transformation,
+    tags,
+  } = options;
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        public_id: publicId,
+        resource_type: resourceType,
+        transformation,
+        tags,
+      },
+      (error, result) => {
+        if (error) {
+          return reject(error);
+        }
+
+        resolve(result);
+      }
+    );
+
+    Readable.from(file.buffer).pipe(uploadStream);
   });
 };
 
-module.exports = { upload, handleAvatarUpload };
+module.exports = {
+  handleAvatarUpload,
+  handlePostMediaUpload,
+  uploadBufferToCloudinary,
+  IMAGE_MIME_TYPES,
+  VIDEO_MIME_TYPES,
+  POST_MIME_TYPES,
+  MAX_IMAGE_SIZE,
+  MAX_VIDEO_SIZE,
+};

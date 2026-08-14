@@ -11,8 +11,9 @@ const {
 } = require('../controllers/postController');
 const auth = require('../middleware/auth');
 const { postValidation, objectIdParam } = require('../middleware/validation');
+const { handlePostMediaUpload } = require('../middleware/upload');
 
-router.post('/', auth, postValidation, createPost);
+router.post('/', auth, handlePostMediaUpload, postValidation, createPost);
 router.get('/', getAllPosts);
 router.get('/feed', auth, getFeed);
 router.get('/user/:userId', objectIdParam('userId'), getUserPosts);

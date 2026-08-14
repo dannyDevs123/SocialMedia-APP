@@ -18,6 +18,19 @@ const postSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    mediaUrl: {
+      type: String,
+      default: '',
+    },
+    mediaType: {
+      type: String,
+      enum: ['image', 'video', ''],
+      default: '',
+    },
+    mediaPublicId: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,
@@ -25,6 +38,22 @@ const postSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+postSchema.pre('validate', function syncLegacyMediaFields(next) {
+  if (!this.mediaUrl && this.imageUrl) {
+    this.mediaUrl = this.imageUrl;
+  }
+
+  if (!this.imageUrl && this.mediaUrl) {
+    this.imageUrl = this.mediaUrl;
+  }
+
+  if (!this.mediaType && this.mediaUrl) {
+    this.mediaType = 'image';
+  }
+
+  next();
+});
 
 // Virtual for comments
 postSchema.virtual('comments', {

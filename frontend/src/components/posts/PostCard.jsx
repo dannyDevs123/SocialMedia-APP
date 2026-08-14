@@ -7,6 +7,7 @@ import LikeButton from '../likes/LikeButton';
 import CommentSection from '../comments/CommentSection';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { sameId } from '../../utils/id';
+import { displayText } from '../../utils/text';
 
 const PostCard = ({ post, onDelete, onUpdate }) => {
   const { user } = useAuth();
@@ -165,7 +166,7 @@ const PostCard = ({ post, onDelete, onUpdate }) => {
             </div>
           ) : (
             <div className="mt-1">
-              <p className="text-[15px] text-[#0f1419] whitespace-pre-wrap leading-relaxed">{currentPost.content}</p>
+              <p className="text-[15px] text-[#0f1419] whitespace-pre-wrap leading-relaxed">{displayText(currentPost.content)}</p>
               {currentPost.imageUrl && (
                 <img
                   src={currentPost.imageUrl}

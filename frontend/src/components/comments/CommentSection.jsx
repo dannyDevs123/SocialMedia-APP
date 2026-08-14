@@ -168,7 +168,9 @@ const CommentSection = ({ postId }) => {
           />
         ))}
         {commentTree.length === 0 && (
-          <p className="text-[#536471] text-sm text-center py-4">No replies yet â€” start the conversation</p>
+          <p className="text-[#536471] text-sm text-center py-4">
+            No replies yet {'\u2014'} start the conversation
+          </p>
         )}
       </div>
     </div>

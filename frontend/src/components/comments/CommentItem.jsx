@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import commentService from '../../services/commentService';
 import { toast } from 'react-toastify';
 import { asArray, getId, sameId } from '../../utils/id';
+import { displayText } from '../../utils/text';
 
 const CommentItem = ({ comment, onDelete, onUpdate, postId, onReply }) => {
   const { user } = useAuth();
@@ -77,7 +78,7 @@ const CommentItem = ({ comment, onDelete, onUpdate, postId, onReply }) => {
               <button onClick={() => setIsEditing(false)} className="text-sm text-[#536471] hover:underline px-2">Cancel</button>
             </div>
           ) : (
-            <p className="text-sm text-[#0f1419] mt-0.5 leading-relaxed">{comment.content}</p>
+            <p className="text-sm text-[#0f1419] mt-0.5 leading-relaxed">{displayText(comment.content)}</p>
           )}
           <div className="flex items-center gap-4 mt-1.5">
             {user && (
@@ -123,7 +124,7 @@ const CommentItem = ({ comment, onDelete, onUpdate, postId, onReply }) => {
                   <p className="font-bold text-xs text-[#0f1419]">{reply.userId?.name}</p>
                   <span className="text-xs text-[#536471]">@{reply.userId?.name?.toLowerCase().replace(/\s+/g, '')}</span>
                 </div>
-                <p className="text-xs text-[#0f1419] mt-0.5 leading-relaxed">{reply.content}</p>
+                <p className="text-xs text-[#0f1419] mt-0.5 leading-relaxed">{displayText(reply.content)}</p>
               </div>
             </div>
           ))}
