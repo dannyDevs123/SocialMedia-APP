@@ -30,7 +30,7 @@ const Login = () => {
     setLoading(true);
     try {
       await login(data.email, data.password);
-      toast.success('');
+      toast.success('Welcome');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed');
     } finally { setLoading(false); }
